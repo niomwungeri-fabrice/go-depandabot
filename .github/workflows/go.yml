@@ -1,10 +1,5 @@
-name: Go
-
-on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+name: Dependabot auto-merge
+on: pull_request
 
 permissions:
   pull-requests: write
