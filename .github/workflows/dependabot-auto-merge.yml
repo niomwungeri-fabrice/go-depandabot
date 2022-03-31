@@ -1,0 +1,35 @@
+name: Dependabot Pull Request Approve and Merge
+
+# Only trigger, when the build workflow of ["Go-Dependabot"] Completed
+on:
+  workflow_run:
+    workflows: ["Go-Dependabot"]
+    types:
+      - completed
+
+permissions:
+  pull-requests: write
+  contents: write
+
+jobs:
+  dependabot:
+    runs-on: ubuntu-latest
+    ## Only runs those steps if conclusion of the parent is a success, and if actor is dependabot
+    if: ${{ github.event.workflow_run.conclusion == 'success'}}
+    steps:
+    # Checking the actor will prevent your Action run failing on non-Dependabot
+    # PRs but also ensures that it only does work for Dependabot PRs.
+      # This first step will fail if there's no metadata and so the approval
+      # will not occur.
+      - name: Dependabot metadata
+        id: dependabot-metadata
+        uses: dependabot/fetch-metadata@v1.1.1
+        with:
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
+      # Finally, this sets the PR to allow auto-merging for patch and minor
+      - name: Enable auto-merge for Dependabot PRs
+        if: ${{ steps.dependabot-metadata.outputs.update-type != 'version-update:semver-major' }}
+        run: gh pr merge --auto --squash "$PR_URL"
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
