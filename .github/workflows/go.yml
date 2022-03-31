@@ -21,7 +21,7 @@ jobs:
       - name: Test
         run: go test -v ./...
 
-  dependabot:
+  test:
     needs: build
     if: ${{needs.build.result == 'success' && github.actor == 'dependabot[bot]'}} #only run if it's a commit to master AND previous success
     runs-on: ubuntu-latest
